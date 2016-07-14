@@ -15,9 +15,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        //Start the SDK
+        // types are UIUserNotificationType values
+        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: [.Alert, .Badge, .Sound], categories: nil))
+
         return true
     }
-
+    
+    func application(application: UIApplication, didReceiveLocalNotification notification: UILocalNotification) {
+        NSNotificationCenter.defaultCenter().postNotificationName("TodoListShouldRefresh", object: self)
+    }
+    
+    func applicationDidBecomeActive(application: UIApplication) {
+        NSNotificationCenter.defaultCenter().postNotificationName("TodoListShouldRefresh", object: self)
+    }
 }
 
