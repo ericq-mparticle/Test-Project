@@ -23,7 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let remindAction = UIMutableUserNotificationAction()
         remindAction.identifier = "REMIND"
-        remindAction.title = "Remind in 1 minute"
+        remindAction.title = "Remind in 60 seconds"
         remindAction.activationMode = .Background
         remindAction.destructive = false
         
