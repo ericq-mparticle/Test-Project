@@ -34,6 +34,8 @@ class TodoList {
         notification.userInfo = ["title": item.title, "UUID": item.UUID] // assign a unique identifier to the notification so that we can retrieve it later
         
         UIApplication.sharedApplication().scheduleLocalNotification(notification)
+        
+        self.setBadgeNumbers()
     }
     
     func allItems() -> [TodoItem] {
@@ -58,6 +60,36 @@ class TodoList {
             todoItems.removeValueForKey(item.UUID)
             NSUserDefaults.standardUserDefaults().setObject(todoItems, forKey: ITEMS_KEY) // save/overwrite todo item list
         }
+        
+        self.setBadgeNumbers()
     }
 
+    func setBadgeNumbers() {
+        let scheduledNotifications: [UILocalNotification]? = UIApplication.sharedApplication().scheduledLocalNotifications // all scheduled notifications
+        guard scheduledNotifications != nil else {return} // Nothing to remove, so return
+        
+        let todoItems: [TodoItem] = self.allItems()
+        
+        for notification in scheduledNotifications! {
+            let overdueItems = todoItems.filter({ (todoItem) -> Bool in // array of to-do items...
+                return (todoItem.deadline.compare(notification.fireDate!) != .OrderedDescending) // ...where item deadline is before or on notification fire date
+            })
+            UIApplication.sharedApplication().cancelLocalNotification(notification) // cancel old notification
+            notification.applicationIconBadgeNumber = overdueItems.count // set new badge number
+            UIApplication.sharedApplication().scheduleLocalNotification(notification) // reschedule notification
+        }
+    }
+    
+    func scheduleReminderforItem(item: TodoItem) {
+        let notification = UILocalNotification() // create a new reminder notification
+        notification.alertBody = "Reminder: Todo Item \"\(item.title)\" Is Overdue" // text that will be displayed in the notification
+        notification.alertAction = "open" // text that is displayed after "slide to..." on the lock screen - defaults to "slide to view"
+        notification.fireDate = NSDate().dateByAddingTimeInterval(1 * 60) // 1 minute from current time
+        notification.soundName = UILocalNotificationDefaultSoundName // play default sound
+        notification.userInfo = ["title": item.title, "UUID": item.UUID] // assign a unique identifier to the notification that we can use to retrieve it later
+        notification.category = "TODO_CATEGORY"
+        
+        UIApplication.sharedApplication().scheduleLocalNotification(notification)
+    }
+    
 }
